@@ -1,58 +1,152 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Container,
+  Divider,
+  Link,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Pagination,
+  TextField,
+  Typography,
+} from "@mui/material";
+import axios from "axios";
+import React, { FC, useEffect, useState } from "react";
+import RepositoryList from "./Components/RepoList";
+import {
+  repoListSelector,
+  repoIsLoadSelector,
+  repoErrorSelector,
+  repoCntSelector,
+} from "./store/features/repo/repoSelector";
+import { searchReposAsync, RepoItem } from "./store/features/repo/repoSlice";
+import { useAppDispatch, useAppSelector } from "./store/hooks";
 
-function App() {
+const App: FC = () => {
+  const dispatch = useAppDispatch();
+  const repoList = useAppSelector((state) => repoListSelector(state));
+  const isLoading = useAppSelector((state) => repoIsLoadSelector(state));
+  const fetchError = useAppSelector((state) => repoErrorSelector(state));
+  const totalCnt = useAppSelector((state) => repoCntSelector(state));
+  const [perPage, setPerPage] = useState<number>(10);
+  const [curPage, setCurPage] = useState<number>(1);
+  const [repoKeyword, setRepoKeyword] = useState<string>("");
+  const [curRepoKeyword, setCurRepoKeyword] = useState<string>("");
+
+  const handleChangePage = (
+    event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setCurPage(value);
+  };
+
+  useEffect(() => {
+    if (curRepoKeyword !== "") {
+      dispatch(
+        searchReposAsync({
+          repoKeyword: curRepoKeyword,
+          pageInd: curPage,
+          perPage: perPage,
+        })
+      );
+    }
+  }, [curPage, curRepoKeyword]);
+
+  const handleChangeKeyword = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRepoKeyword(event.target.value);
+  };
+
+  const handleClickSearch = () => {
+    setCurRepoKeyword(repoKeyword);
+    setCurPage(1);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
+    <Container sx={{ py: 2 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        <TextField
+          variant="outlined"
+          placeholder="Search Keyword"
+          value={repoKeyword}
+          onChange={handleChangeKeyword}
+          size="small"
+        />
+        <Button
+          variant="contained"
+          sx={{ ml: 2 }}
+          onClick={handleClickSearch}
+          disabled={isLoading}
+        >
+          Search
+        </Button>
+      </Box>
+      <Box
+        sx={{
+          width: "100%",
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {isLoading ? (
+          <Box
+            sx={{
+              height: 200,
+              alignItems: "center",
+              display: "flex",
+            }}
           >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
+            <CircularProgress
+              color="primary"
+              data-testid="test-circle-progress"
+            />
+          </Box>
+        ) : fetchError ? (
+          <Box
+            sx={{
+              height: 200,
+              alignItems: "center",
+              display: "flex",
+            }}
           >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
+            <Typography variant="h5">{fetchError}</Typography>
+          </Box>
+        ) : (
+          <RepositoryList repoList={repoList} />
+        )}
+        {!isLoading && totalCnt === 0 ? (
+          <Box
+            sx={{
+              height: 200,
+              alignItems: "center",
+              display: "flex",
+            }}
           >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
-    </div>
+            <Typography variant="h5">
+              {curRepoKeyword !== ""
+                ? "No Repository"
+                : "Search Github Repositories by Name"}
+            </Typography>
+          </Box>
+        ) : (
+          <Pagination
+            count={Math.ceil(totalCnt / perPage)}
+            color="primary"
+            boundaryCount={2}
+            page={curPage}
+            onChange={handleChangePage}
+            disabled={isLoading}
+            data-testid="test-pagination"
+          />
+        )}
+      </Box>
+    </Container>
   );
-}
+};
 
 export default App;

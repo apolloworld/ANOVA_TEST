@@ -1,27 +1,14 @@
 import { AnyAction, combineReducers } from "@reduxjs/toolkit";
-import { HYDRATE } from "next-redux-wrapper";
 
-import { counterReducer } from "./features/counter/counterSlice";
-import { flightsReducer } from "./features/flights/flightsSlice";
+import { repoReducer } from "./features/repo/repoSlice";
 
 const combinedReducer = combineReducers({
-  counter: counterReducer,
-  flights: flightsReducer
+  repo: repoReducer,
 });
 
 export const rootReducer = (
   state: ReturnType<typeof combinedReducer> | undefined,
   action: AnyAction
 ) => {
-  switch (action.type) {
-    case HYDRATE: {
-      const nextState = {
-        ...state,
-        ...action.payload,
-      };
-      return nextState;
-    }
-    default:
-      return combinedReducer(state, action);
-  }
+  return combinedReducer(state, action);
 };

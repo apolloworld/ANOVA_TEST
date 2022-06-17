@@ -3,12 +3,11 @@ import {
   ConfigureStoreOptions,
   Middleware,
 } from "@reduxjs/toolkit";
-import { Context, createWrapper } from "next-redux-wrapper";
-import logger from "redux-logger";
+//import logger from "redux-logger";
 import { rootReducer } from "./rootReducer";
 import { thunkExtraArgument } from "./thunkExtraArgument";
 
-const middlewares: Middleware[] = [logger];
+const middlewares: Middleware[] = [];
 
 export const initStore = (
   storeOptions?: Omit<ConfigureStoreOptions, "reducer">
@@ -22,12 +21,9 @@ export const initStore = (
         thunk: {
           extraArgument: thunkExtraArgument,
         },
-
         serializableCheck: false,
       }).concat(...middlewares),
   });
 };
 
-export const wrapper = createWrapper((_: Context) => initStore(), {
-  debug: false,
-});
+export const store = initStore();
