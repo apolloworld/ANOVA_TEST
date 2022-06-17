@@ -1,21 +1,12 @@
 import {
-  Avatar,
   Box,
   Button,
-  Chip,
   CircularProgress,
   Container,
-  Divider,
-  Link,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Pagination,
   TextField,
   Typography,
 } from "@mui/material";
-import axios from "axios";
 import React, { FC, useEffect, useState } from "react";
 import RepositoryList from "./Components/RepoList";
 import {
@@ -24,7 +15,7 @@ import {
   repoErrorSelector,
   repoCntSelector,
 } from "./store/features/repo/repoSelector";
-import { searchReposAsync, RepoItem } from "./store/features/repo/repoSlice";
+import { searchReposAsync } from "./store/features/repo/repoSlice";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 
 const App: FC = () => {
